@@ -67,12 +67,16 @@ def find_va():
         sum_tr = sum_tr + tr_t[i]                  
         sort_prio(s_time[i+1],p_t)   # <---- Get value to sort prioriy
 
+        # Avg of waiting time and turn around time
+        sum_wt = sum_wt / totalprocess
+        sum_tr = sum_tr / totalprocess
+
     # Output
     print("\nProcess \tArrivaltime \tBursttime \tPriority \tWaiting \tTurnaround")
     for i in range(totalprocess):
         print("P{} \t\t{} \t\t{} \t\t{} \t\t{} \t\t{}".format(proc[i][3],proc[i][0],proc[i][1],proc[i][2],wt[i],tr_t[i]))
-    print("\nAvg waiting time : " + str(sum_wt))
-    print("Avg turnaround time : " + str(sum_tr) + "\n")
+    print("\nAvg waiting time : {:.2f}".format(sum_wt))
+    print("Avg turnaround time : {:.2f}\n".format(sum_tr))
         
 '''
     proc 0 : arrival time
