@@ -1,29 +1,17 @@
-''' 
-1. Sort the arrival time
-2. if arrival time same focus priority
-3. apply FCFS
-'''
 
-arrivaltime = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-bursttime = [10, 20, 5, 3, 15, 25, 10, 25, 5, 10, 2, 20, 10, 20, 5, 3, 15, 25, 10, 25]
-priority = [3, 2, 1, 5, 4, 2, 1, 1, 3, 3, 5, 5, 3, 2, 1, 5, 4, 2, 1, 1]
-totalprocess = len(arrivaltime)
-proc = []
+import pandas as pd  # <------ import pandas
 
-for i in range(totalprocess):
-    # init value to calculate
-    # P_num , Burst_t, Arr_t, Priority
-    l = []
-    for j in range(4):
-        l.append(0)
-    proc.append(l)
+# Read file from excel and get value
+dic = pd.read_excel('test.xlsx')
+proc = list(dic.values)
+totalprocess = len(proc)
 
 # Sort arrival time each process
 def sort_proc():
     temp = []
     for j in range(totalprocess):
         for i in range(0,totalprocess-j-1,1):
-            if proc[i][0] > proc[i+1][0]: # swap value p[i] and p[i+1]
+            if proc[i][2] > proc[i+1][2]: # swap value p[i] and p[i+1]
                 temp = proc[i]
                 proc[i] = proc[i+1]
                 proc[i+1] = temp
@@ -33,12 +21,12 @@ def sort_prio(b_t,p_t):
     # Check value while arrival time 
     stk = 0
     for i in range(p_t,totalprocess):
-        if proc[i][0] < b_t:
+        if proc[i][2] < b_t:
             stk += 1
     
     for i in range(stk): # <---- swap Process with priority
         for j in range(p_t,stk-i,+1):
-            if proc[j][2] > proc[j+1][2]:
+            if proc[j][3] > proc[j+1][3]:
                 temp = proc[j]
                 proc[j] = proc[j+1]
                 proc[j+1] = temp
@@ -60,7 +48,7 @@ def find_va():
     for i in range(totalprocess):
         # Function create value each process
         s_time[i+1] = proc[i][1] + s_time[i]
-        tr_t[i] = s_time[i+1] - proc[i][0]
+        tr_t[i] = s_time[i+1] - proc[i][2]
         wt[i] = tr_t[i] - proc[i][1]
         p_t =+ 1
         sum_wt = sum_wt + wt[i] 
@@ -72,32 +60,11 @@ def find_va():
         sum_tr = sum_tr / totalprocess
 
     # Output
-    print("\nProcess \tArrivaltime \tBursttime \tPriority \tWaiting \tTurnaround")
+    print("\nProcess \tBursttime \tArrivaltime \tPriority \tWaiting \tTurnaround")
     for i in range(totalprocess):
-        print("P{} \t\t{} \t\t{} \t\t{} \t\t{} \t\t{}".format(proc[i][3],proc[i][0],proc[i][1],proc[i][2],wt[i],tr_t[i]))
+        print("{} \t\t{} \t\t{} \t\t{} \t\t{} \t\t{}".format(proc[i][0],proc[i][1],proc[i][2],proc[i][3],wt[i],tr_t[i]))
     print("\nAvg waiting time : {:.2f}".format(sum_wt))
     print("Avg turnaround time : {:.2f}\n".format(sum_tr))
         
-'''
-    proc 0 : arrival time
-    proc 1 : burst time
-    proc 2 : priority
-    proc 3 : process number
-'''
-# init value to each process
-for i in range(totalprocess):
-    proc[i][0] = arrivaltime[i]
-    proc[i][1] = bursttime[i]
-    proc[i][2] = priority[i]
-    proc[i][3] = i + 1
-
-# Use func to calculate
+# Calculate queue non-preem-prioriy
 find_va()
-
-
-
-        
-    
-        
-        
-        
