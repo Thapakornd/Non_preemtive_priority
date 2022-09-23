@@ -1,4 +1,5 @@
-
+import time
+from alive_progress import alive_bar
 import pandas as pd  # <------ import pandas
 
 # Read file from excel and get value
@@ -35,8 +36,6 @@ def find_va():
     s_time = [0] * (totalprocess+1)  # <------ Comput time each process
     tr_t = [0] * totalprocess   # <------ Turn around time each process
     wt = [0] * totalprocess   # <------ Waiting time each process
-    cpu_util = []
-    thr_p = []
     s_time[0] = 0  # <------ Set P1 start 0 
     p_t = 0  # <---- Set Process computed
     sum_wt = 0
@@ -60,11 +59,19 @@ def find_va():
         sum_tr = sum_tr / totalprocess
 
     # Output
+    for i in range(totalprocess):
+        print(f"\t\t{s_time[i]} ------- {s_time[i+1]}")
+        with alive_bar(proc[i][1],title=f"{proc[i][0]}") as bar:
+            for x in range(proc[i][1]):
+                time.sleep(0.01)
+                bar()
+
     print("\nProcess \tBursttime \tArrivaltime \tPriority \tWaiting \tTurnaround")
     for i in range(totalprocess):
         print("{} \t\t{} \t\t{} \t\t{} \t\t{} \t\t{}".format(proc[i][0],proc[i][1],proc[i][2],proc[i][3],wt[i],tr_t[i]))
-    print("\nAvg waiting time : {:.2f}".format(sum_wt))
-    print("Avg turnaround time : {:.2f}\n".format(sum_tr))
-        
+    print("\n\nAvg waiting time : {:.2f}".format(sum_wt))
+    print("Avg turnaround time : {:.2f}".format(sum_tr))
+    print("CPU utilization : 100%")
+
 # Calculate queue non-preem-prioriy
 find_va()
