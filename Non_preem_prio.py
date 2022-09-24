@@ -6,6 +6,8 @@ import pandas as pd  # <------ import pandas
 dic = pd.read_excel('test.xlsx')
 proc = list(dic.values)
 totalprocess = len(proc)
+# Set time comput is 1 ms 
+comput_t = 0.001 
 
 # Sort arrival time each process
 def sort_proc():
@@ -63,7 +65,7 @@ def find_va():
         print(f"\t\t{s_time[i]} ------- {s_time[i+1]}")
         with alive_bar(proc[i][1],title=f"{proc[i][0]}") as bar:
             for x in range(proc[i][1]):
-                time.sleep(0.01)
+                time.sleep(comput_t)
                 bar()
 
     print("\nProcess \tBursttime \tArrivaltime \tPriority \tWaiting \tTurnaround")
@@ -72,6 +74,8 @@ def find_va():
     print("\n\nAvg waiting time : {:.2f}".format(sum_wt))
     print("Avg turnaround time : {:.2f}".format(sum_tr))
     print("CPU utilization : 100%")
+    print("Throughput : {:.2f} process/sec\n".format(totalprocess / (s_time[-1] * comput_t)))
+
 
 # Calculate queue non-preem-prioriy
 find_va()
