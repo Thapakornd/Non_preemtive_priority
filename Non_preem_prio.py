@@ -44,20 +44,6 @@ def find_va():
     # Function sort arrival time    
     sort_proc()
 
-    for i in range(totalprocess):
-        # Function create value each process
-        s_time[i+1] = proc[i][1] + s_time[i]
-        tr_t[i] = s_time[i+1] - proc[i][2]
-        wt[i] = tr_t[i] - proc[i][1]
-        p_t =+ 1
-        sum_wt = sum_wt + wt[i] 
-        sum_tr = sum_tr + tr_t[i]                  
-        sort_prio(s_time[i+1],p_t)   # <---- Get value to sort prioriy
-
-        # Avg of waiting time and turn around time
-        sum_wt = sum_wt / totalprocess
-        sum_tr = sum_tr / totalprocess
-
     # Output
     for i in range(totalprocess):
         print(f"\t\t{s_time[i]} ------- {s_time[i+1]}")
