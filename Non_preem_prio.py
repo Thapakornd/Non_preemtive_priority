@@ -2,6 +2,7 @@
 import time
 from alive_progress import alive_bar
 import pandas as pd  # <------ import pandas
+import os
 
 # Read file from excel and get value
 dic = pd.read_excel('test11.xlsx')
@@ -88,10 +89,10 @@ def find_va():
     print(f"CPU utilization : {burst_t / s_time[-1] * 100:.2f}")
 
 # Calculate queue non-preem-prioriy
-while True:
-    find_va()
-    key = input()
-    if key == "1":
-        break
+
+try:
+    os.system('cmd /k "dir"')
+except:
+    print("Could not exe cmd")
 
 
