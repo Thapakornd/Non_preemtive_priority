@@ -90,3 +90,10 @@ def find_va():
 
 # Calculate queue non-preem-prioriy
 
+print("Press anything to Show CPU scheduling...")
+
+while True:
+    find_va()
+    key = input()
+    if key == "1":
+        break
