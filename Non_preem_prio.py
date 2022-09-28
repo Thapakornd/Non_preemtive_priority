@@ -89,4 +89,4 @@ def find_va():
 
 
 # Calculate queue non-preem-prioriy
-find_va()
+
