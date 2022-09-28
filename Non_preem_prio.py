@@ -87,13 +87,11 @@ def find_va():
     print(f"Throughput : {totalprocess / s_time[-1]:.2f} process/sec")
     print(f"CPU utilization : {burst_t / s_time[-1] * 100:.2f}")
 
-
 # Calculate queue non-preem-prioriy
-
-print("Press anything to Show CPU scheduling...")
-
 while True:
     find_va()
     key = input()
     if key == "1":
         break
+
+
