@@ -1,30 +1,28 @@
 
-from this import d
 import time
 from alive_progress import alive_bar
 import pandas as pd  # <------ import pandas
 
 # Read file from excel and get value
-dic = pd.read_excel('Book1.xlsx')
+dic = pd.read_excel('test11.xlsx')
 proc = list(dic.values)
 totalprocess = len(proc)
 
 # Sort arrival time each process
 def sort_proc():
     temp = []
-    for j in range(len(proc)):
-        for i in range(0,len(proc)-j-1,1):
+    for j in range(totalprocess):
+        for i in range(0,totalprocess-j-1,1):
             if proc[i][2] > proc[i+1][2]: # swap value p[i] and p[i+1]
                 temp = proc[i]
                 proc[i] = proc[i+1]
                 proc[i+1] = temp
-    return proc
 
 # Sort Priority each arrival time
 def sort_prio(b_t,p_t):
     # Check value while arrival time
     stk = 0
-    for i in range(p_t,len(proc)):
+    for i in range(p_t,totalprocess):
         if proc[i][2] <= b_t:
             stk += 1
     
@@ -35,62 +33,59 @@ def sort_prio(b_t,p_t):
                 proc[j] = proc[j+1]
                 proc[j+1] = temp
 
-def progress_bar(st,end,val):
-    print(f"\t\t{st} -------- {end}")
-    with alive_bar(end,title=f"{val}") as bar:
-        for i in range(end):
-            time.sleep(0.001)
-            bar()
-
 def find_va():
     s_time = [] # <------ Comput time each process
-    tr_t = [0] * totalprocess   # <------ Turn around time each process
-    wt = [0] * totalprocess   # <------ Waiting time each process
-        # <------ Set P1 start 0 
     p_t = 0  # <---- Set Process computed
-    sum_wt = 0
+    taround_t = []  # <------- TurnAround Time
+    wat_t = []  # <--------- Waiting time
+    output = []  # <-------- Process Bar
+    burst_t = 0  # <-------- total Burst_time 
+    t = 0  # <-------- Time running
+    sum_wat = 0
     sum_tr = 0
-    output = []
-    burst_t = 0
 
+    # Calculate all burst time
     for i in proc:
         burst_t += i[1]
 
     # Function sort arrival time    
-    sort_proc()
-    t = 0
-    first_p = True
+    sort_proc()    
     s_time.append(0)
     while True:
         if proc[p_t][2] <= t:
             if t != s_time[-1]:
                 s_time.append(t)
+                output.append(["None",t-s_time[-2]])
             s_time.append(proc[p_t][1] + s_time[-1])
             output.append([proc[p_t][0],proc[p_t][1],s_time[-2],s_time[-1]])
-            burst_t = burst_t - proc[p_t][1]
+            taround_t.append(s_time[-1]-proc[p_t][2])
+            wat_t.append(taround_t[p_t]-proc[p_t][1])
+            sum_tr += taround_t[p_t]
+            sum_wat += wat_t[p_t]
             p_t += 1
             sort_prio(s_time[-1],p_t)
             t = s_time[-1]
-        if burst_t == 0:
+        if p_t == totalprocess:
             break
         if proc[p_t][2] != s_time[-1] and proc[p_t][2] > s_time[-1]:
             t += 1
 
-            
-    print("\nProcess \tBursttime \tArrivaltime \tPriority \tWaiting \tTurnaround")
-    for i in range(totalprocess):
-        print("{} \t\t{} \t\t{} \t\t{}".format(output[i][0],output[i][1],output[i][2],output[i][3]))
-
-    for i in output:
-        with alive_bar(i[1],title=i[0]) as bar:
-            for x in range(i[1]):
+    print("\n\t---------Process bar---------\n")
+    for i in range(len(output)):
+        print(f"\t\t {s_time[i]} ------- {s_time[i+1]}")
+        with alive_bar(output[i][1],title=output[i][0]) as bar:
+            for x in range(output[i][1]):
                 time.sleep(0.001)
                 bar()
 
-    print(s_time)
-    #print("\n\nAvg waiting time : {:.2f}".format(sum_wt))
-    #print("Avg turnaround time : {:.2f}".format(sum_tr))
-    #print("Throughput : {:.2f} process/sec\n".format(totalprocess / (s_time[-1])))
+    print("\n     Process   \t    Bursttime\t   Arrivaltime\t     Priority\t     Waiting \t   Turnaround")
+    for i in range(totalprocess):
+        print(f"\t{proc[i][0]} \t|\t{proc[i][1]} \t|\t{proc[i][2]} \t|\t{proc[i][3]} \t|\t{wat_t[i]} \t|\t{taround_t[i]}")
+
+    print(f"\nAvg Turnaround time : {sum_tr / totalprocess}")
+    print(f"Avg Waiting time : {sum_wat / totalprocess}")
+    print(f"Throughput : {totalprocess / s_time[-1]:.2f} process/sec")
+    print(f"CPU utilization : {burst_t / s_time[-1] * 100:.2f}")
 
 
 # Calculate queue non-preem-prioriy
