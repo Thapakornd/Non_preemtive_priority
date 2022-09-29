@@ -2,10 +2,9 @@
 import time
 from alive_progress import alive_bar
 import pandas as pd  # <------ import pandas
-import os
 
 # Read file from excel and get value
-dic = pd.read_excel('test11.xlsx')
+dic = pd.read_excel("test11.xlsx")
 proc = list(dic.values)
 totalprocess = len(proc)
 
@@ -90,9 +89,5 @@ def find_va():
 
 # Calculate queue non-preem-prioriy
 
-try:
-    os.system('cmd /k "dir"')
-except:
-    print("Could not exe cmd")
-
+find_va()
 
