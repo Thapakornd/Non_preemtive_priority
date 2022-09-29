@@ -1,4 +1,3 @@
-from cProfile import label
 import tkinter as tk
 from tkinter import CENTER, filedialog, ttk, messagebox
 import pandas as pd
