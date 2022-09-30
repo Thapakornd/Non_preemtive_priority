@@ -75,7 +75,7 @@ def find_va():
         print(f"\t\t {s_time[i]} ------- {s_time[i+1]}")
         with alive_bar(output[i][1],title=output[i][0]) as bar:
             for x in range(output[i][1]):
-                time.sleep(0.001)
+                time.sleep(1)
                 bar()
 
     print("\n     Process   \t    Bursttime\t   Arrivaltime\t     Priority\t     Waiting \t   Turnaround")

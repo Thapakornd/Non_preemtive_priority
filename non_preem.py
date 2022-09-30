@@ -1,25 +1,25 @@
 import tkinter as tk
-from tkinter import CENTER, filedialog, ttk, messagebox
+from tkinter import BOTH, BOTTOM, CENTER, HORIZONTAL, LEFT, Canvas, Frame, filedialog, ttk, messagebox
 import pandas as pd
 import os
 
 root = tk.Tk()
-root.geometry("800x500")
+root.geometry("800x600")
 root.resizable(0,0)
 
 # Frame for Treeview
 frame1 = tk.LabelFrame(root, text="Excel Data")
-frame1.place(height=400,width=400)
+frame1.place(height=300,width=400)
 
 frame2 = tk.LabelFrame(root, text="Comput process")
-frame2.place(height=400,width=400,x=400,rely=0)
-
-frame3 = tk.LabelFrame(root, text="Infomation of CPU")
-frame3.place(height=200,width=800,relx=0,rely=0.7)
+frame2.place(height=300,width=400,x=400)
 
 # Frame for for open file dialog
 file_frame = tk.LabelFrame(root, text="Open File")
 file_frame.place(height=100, width=800,relx=0,rely=0.5)
+
+frame3 = tk.LabelFrame(root, text="Process Bar")
+frame3.place(relx=0,rely=0.7,height=200,width=800)
 
 # Button
 button1 = tk.Button(file_frame, text="Browse a file",command=lambda:file_dialog())
@@ -150,7 +150,7 @@ def excute_data():
     tree_x["column"] = temp_to_list
     tree_x["show"] = "headings"
     for col in tree_x["column"]:
-        tree_x.column(col, width="1",anchor=CENTER)
+        tree_x.column(col, width="10",anchor=CENTER)
     for column in tree_x["column"]:
         tree_x.heading(column, text=column,anchor=CENTER)
     for row in proc:
@@ -187,7 +187,7 @@ def load_excel_data():
     tree["column"] = list(re_excel.columns)
     tree["show"] = "headings"
     for col in tree["column"]:
-        tree.column(col, width="1",anchor=CENTER)
+        tree.column(col, width="10",anchor=CENTER)
 
     for column in tree["column"]:
         tree.heading(column, text=column,anchor=CENTER)
