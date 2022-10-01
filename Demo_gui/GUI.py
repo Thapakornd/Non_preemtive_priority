@@ -1,7 +1,7 @@
 
 import tkinter as tk
-from tkinter import Canvas, Frame, Label, filedialog,ttk,messagebox
-from turtle import width
+from tkinter import Canvas, Frame, Label, StringVar, filedialog,ttk,messagebox
+from turtle import position, update, width
 import pandas as pd
 import time
 
@@ -31,11 +31,15 @@ process_frame.place(height=185,width=780, x=10, rely=0.67)
 
 # Button search file
 button_search = tk.Button(file_frame, text="Browse a file",command=lambda: file_dialog())
-button_search.place(rely=0.45,relx=0.2)
+button_search.place(rely=0.45,relx=0.15)
 
 # Button Load file to excute
 button_excute = tk.Button(file_frame, text="Load file", command=lambda: load_file())
-button_excute.place(rely=0.45, relx=0.6)
+button_excute.place(rely=0.45, relx=0.45)
+
+# Button Simulate Progress Bar
+button_simu = tk.Button(file_frame, text="Simulate File",command=lambda: simulate())
+button_simu.place(rely=0.45, relx=0.7)
 
 # File name selected
 label_file = ttk.Label(file_frame, text="No File Selected")
@@ -66,23 +70,6 @@ tree_excute.configure(xscrollcommand=ex_scroll_x.set,yscrollcommand=ex_scroll_y.
 ex_scroll_x.pack(side='bottom',fill="x")
 ex_scroll_y.pack(side='right',fill='y')
 
-# Scrollbar set up Frame 3
-temp_scroll = []
-
-my_canvas = Canvas(process_frame)
-my_canvas.place(relheight=1,relwidth=1)
-
-my_scrollbar = tk.Scrollbar(process_frame, orient="horizontal",command=my_canvas.xview)
-my_scrollbar.pack(side='bottom',fill='x')
-
-my_canvas.configure(xscrollcommand=my_scrollbar.set)
-my_canvas.bind('<Configure>',lambda e: my_canvas.configure(scrollregion=my_canvas.bbox('all')))
-
-sec_frame = Frame(my_canvas)
-sec_frame.place(relheight=1,relwidth=1)
-
-# Set Scroll bar horizontal
-my_canvas.create_window((0,0),window=sec_frame ,anchor='nw',width=1800,height=1800)
 
 # Function to excute program
 def file_dialog():  # <-- Select path file to excute
@@ -93,18 +80,76 @@ def file_dialog():  # <-- Select path file to excute
 def clear_data(tree):  # <-- Clear data on treeview
     tree.delete(*tree.get_children())
 
-def start_pro(bar,burst): # <-- Start process bar
-    slice_bar = int(100/burst)
-    while bar['value'] < 100:
-        bar["value"] += slice_bar
-        root.update_idletasks()
-        time.sleep(0.001)
+def simulate():
+
+    try: # <-- Check Value in load_file.proc
+        process_bar = []
+        process_bar = load_file.proc
+    except AttributeError:
+        messagebox.showerror("Information","Error value not found.")
+        return None
+
+    def stepup(bar,busrt): # <-- Function run process bar
+        slice_bar = 100 / busrt
+        x = 1
+        while x <= busrt:
+            time.sleep(0.01)
+            bar['value'] += slice_bar
+            b_time.set(str(int(x)))
+            x += 1
+            root.update()
+        b_time.set("")
+
+    # Set templete to scroll bar
+    temp = (len(process_bar) * 150) + 300
+    my_canvas = Canvas(process_frame)
+    my_canvas.place(relheight=1,relwidth=1)
+
+    my_scrollbar = tk.Scrollbar(process_frame, orient="horizontal",command=my_canvas.xview)
+    my_scrollbar.pack(side='bottom',fill='x')
+
+    my_canvas.configure(xscrollcommand=my_scrollbar.set)
+    my_canvas.bind('<Configure>',lambda e: my_canvas.configure(scrollregion=my_canvas.bbox('all')))
+
+    sec_frame = Frame(my_canvas)
+    sec_frame.place(relheight=1,relwidth=1)
+
+    # Set Scroll bar horizontal
+    my_canvas.create_window((0,0),window=sec_frame ,anchor='nw',width=temp,height=1800)
+    
+    # Set Varible use in progress bar
+    b_time = StringVar()
+
+    # Set coloum[0] == " " size : 150 for space
+    sec_frame.grid_columnconfigure(0, minsize=150)
+
+    # Create Process Bar Part
+    for i in range(len(process_bar)):
+        # Process name 
+        process_label = ttk.Label(sec_frame, text=f"{process_bar[i][0]}")
+        process_label.grid(row=1,column=1+i)
+
+        # Progress bar
+        progress_bar = ttk.Progressbar(sec_frame,length=150,mode='determinate')
+        progress_bar.grid(row=2,column=i+1)
+
+        # Time text
+        text_arr = ttk.Label(sec_frame, text=f"{process_bar[i][2]} ---------- {process_bar[i][3]}")
+        text_arr.grid(row=3,column=1+i)
+
+        # Burst Text
+        ttk.Label(sec_frame, textvariable=b_time).grid(row=3,column=1+i)
+
+        sec_frame.grid_columnconfigure(i+1, minsize=150)
+        for row in range(3):
+            sec_frame.grid_rowconfigure(row, minsize=30)
+
+        stepup(progress_bar,process_bar[i][1])
 
 def load_file(): # <-- Loadfile to excute
     file_path = label_file['text']
     try:
-        excel_file = file_path
-        df = pd.read_excel(excel_file)
+        df = pd.read_excel(file_path)
     except:
         messagebox.showerror("Information","Error pls try again!")
         return None
@@ -173,7 +218,7 @@ def load_file(): # <-- Loadfile to excute
         if proc[p_t][2] <= t:
             if t != s_time[-1]:
                 s_time.append(t)
-                output.append(["None",t-s_time[-2]])
+                output.append(["None",t-s_time[-2],s_time[-2],s_time[-1]])
             s_time.append(proc[p_t][1] + s_time[-1])
             output.append([proc[p_t][0],proc[p_t][1],s_time[-2],s_time[-1]])
             taround_t.append(s_time[-1]-proc[p_t][2])
@@ -192,7 +237,7 @@ def load_file(): # <-- Loadfile to excute
     for wt in range(len(wat_t)):
         proc[wt].append(wat_t[wt])
         proc[wt].append(taround_t[wt])
-    
+        
     # Write data to Excute frame
     temp_tolist = list(df.columns)
     temp_tolist.append("Waiting")
@@ -211,9 +256,9 @@ def load_file(): # <-- Loadfile to excute
     avg_wait = ttk.Label(comput_frame, text=f"Avg Waiting time : {sum_wat / totalprocess:.2f}").place(rely=0.3,relx=0.3)
     thrput = ttk.Label(comput_frame, text=f"Throughput : {totalprocess / s_time[-1]:.2f} process/sec").place(rely=0.5,relx=0.3)
     cpu_un = ttk.Label(comput_frame, text=f"CPU utilization : {burst_t / s_time[-1] * 100:.2f}%").place(rely=0.7,relx=0.3)
-
-    # Process bar simulate
     
+    # Copy value of process to sim in simulate
+    load_file.proc = output
 
 # Calculate queue non-preem-prioriy
 
