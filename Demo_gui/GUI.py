@@ -1,28 +1,44 @@
 
 import tkinter as tk
-from tkinter import Canvas, Frame, Label, StringVar, filedialog,ttk,messagebox
-from turtle import position, update, width
+from tkinter import Canvas, Frame, Label, PhotoImage, filedialog,ttk,messagebox
 import pandas as pd
 import time
 
 root = tk.Tk()
 root.geometry("800x600")
-#root.resizable(0,0)
+root.resizable(0,0)
+p1 = PhotoImage(file='Demo_gui/icons8-cpu-16.png')
+root.iconphoto(False,p1)
+root.title("CPU scheduling Non-Preemtive-Priority v1.0")
+
+# Set up font
+font_1 = ('Cosmic Sans MS',20,'bold')
 
 # Frame Treeview Excel data
-frame1 = tk.LabelFrame(root, text="Excel Data")
+frame1 = tk.LabelFrame(root, text="Excel Data",font=('',16,'bold'))
 frame1.place(height=300,width=380,x=10)
 
 # Frame Treeview Excute data
-frame2 = tk.LabelFrame(root, text="Excute File")
+frame2 = tk.LabelFrame(root, text="Excute File",font=('',16,'bold'))
 frame2.place(height=300,width=380,x=410)
 
+# Style treeview
+s = ttk.Style()
+s.theme_use('alt')
+s.configure("Treeview",
+    background='white',
+    foreground ='black',
+    )
+s.map('Treeview',
+    background=[('selected','green')]
+    )
+
 # Frame for open file dialog
-file_frame = tk.LabelFrame(root, text="Open File")
+file_frame = tk.LabelFrame(root, text="Open File",font=('Cohaerentia',16))
 file_frame.place(height=100, width=380, x=10, rely=0.5)
 
 # Frame for Information CPU comput
-comput_frame = tk.LabelFrame(root, text="Comput Information")
+comput_frame = tk.LabelFrame(root, text="Comput Information",font=('Cohaerentia',16,''))
 comput_frame.place(height=100, width=380, x=410, rely=0.5)
 
 # Frame for Progress Bar
@@ -70,7 +86,6 @@ tree_excute.configure(xscrollcommand=ex_scroll_x.set,yscrollcommand=ex_scroll_y.
 ex_scroll_x.pack(side='bottom',fill="x")
 ex_scroll_y.pack(side='right',fill='y')
 
-
 # Function to excute program
 def file_dialog():  # <-- Select path file to excute
     filename = filedialog.askopenfilename(initialdir="/",
@@ -93,13 +108,12 @@ def simulate():
         slice_bar = 100 / busrt
         x = 1
         while x <= busrt:
-            time.sleep(0.01)
             bar['value'] += slice_bar
-            b_time.set(str(int(x)))
+            burst_text.config(text=str(x) + "/" + str(busrt))
             x += 1
             root.update()
-        b_time.set("")
-
+            time.sleep(0.001)
+        
     # Set templete to scroll bar
     temp = (len(process_bar) * 150) + 300
     my_canvas = Canvas(process_frame)
@@ -117,34 +131,40 @@ def simulate():
     # Set Scroll bar horizontal
     my_canvas.create_window((0,0),window=sec_frame ,anchor='nw',width=temp,height=1800)
     
-    # Set Varible use in progress bar
-    b_time = StringVar()
-
     # Set coloum[0] == " " size : 150 for space
+    Label(sec_frame,text="Assign time : 1 sec/burst time").grid(row=0,column=0)
+    Label(sec_frame,text="Start  ------->").grid(row=2,column=0)
     sec_frame.grid_columnconfigure(0, minsize=150)
 
     # Create Process Bar Part
     for i in range(len(process_bar)):
+
         # Process name 
         process_label = ttk.Label(sec_frame, text=f"{process_bar[i][0]}")
         process_label.grid(row=1,column=1+i)
 
         # Progress bar
-        progress_bar = ttk.Progressbar(sec_frame,length=150,mode='determinate')
-        progress_bar.grid(row=2,column=i+1)
+        proc_bar = ttk.Progressbar(sec_frame,length=150,orient='horizontal',mode='determinate')
+        proc_bar.grid(row=2,column=1+i)
 
         # Time text
         text_arr = ttk.Label(sec_frame, text=f"{process_bar[i][2]} ---------- {process_bar[i][3]}")
         text_arr.grid(row=3,column=1+i)
 
         # Burst Text
-        ttk.Label(sec_frame, textvariable=b_time).grid(row=3,column=1+i)
+        burst_text =  ttk.Label(sec_frame, text="0")
+        burst_text.grid(row=4,column=1+i)
 
         sec_frame.grid_columnconfigure(i+1, minsize=150)
         for row in range(3):
             sec_frame.grid_rowconfigure(row, minsize=30)
 
-        stepup(progress_bar,process_bar[i][1])
+        stepup(proc_bar,process_bar[i][1])
+        root.update()
+    
+    Label(sec_frame,text="END of Process").grid(row=2,column=i+2)
+    sec_frame.grid_columnconfigure(i+2, minsize=150)
+
 
 def load_file(): # <-- Loadfile to excute
     file_path = label_file['text']
@@ -164,13 +184,22 @@ def load_file(): # <-- Loadfile to excute
         tree_excel.column(col, minwidth=90,width=90,anchor='center')
 
     for column in tree_excel['column']:
-        tree_excel.heading(column, text=column, anchor='center')
-    
+        tree_excel.heading(column, text=column, anchor='center')            
+
+    tree_excel.tag_configure('grey',background='lightgrey')
+    tree_excel.tag_configure('normal',background='white')
+    row_num = 1    
     for row in r_row:
-        tree_excel.insert("","end",values=row)
+        if row_num % 2 == 0:
+            my_tag = 'grey'
+        else:
+            my_tag = 'normal' 
+        tree_excel.insert("","end",values=row,tags=my_tag)
+        row_num += 1
 
     proc = df.to_numpy().tolist()
     totalprocess = len(proc)
+    tree_excel.rowconfigure(0,)
 
     # Sort arrival time each process
     def sort_proc():
@@ -248,15 +277,30 @@ def load_file(): # <-- Loadfile to excute
         tree_excute.column(col, width=60,minwidth=60,anchor='center')
     for column in tree_excute["column"]:
         tree_excute.heading(column, text=column, anchor='center')
+    
+    tree_excute.tag_configure('blue',background='lightblue')
+    tree_excute.tag_configure('normal',background='white')
+    row_num = 1
     for row in proc:
-        tree_excute.insert("","end",values=row)
+        if row_num % 2 == 0:
+            my_tag = 'blue'
+        else:
+            my_tag = 'normal'
+        tree_excute.insert("","end",values=row,tags=my_tag)
+        row_num += 1
     
     # Information after comput program
-    avg_turn = ttk.Label(comput_frame, text=f"Avg Turnaround time : {sum_tr / totalprocess:.2f}").place(rely=0.1,relx=0.3)
-    avg_wait = ttk.Label(comput_frame, text=f"Avg Waiting time : {sum_wat / totalprocess:.2f}").place(rely=0.3,relx=0.3)
-    thrput = ttk.Label(comput_frame, text=f"Throughput : {totalprocess / s_time[-1]:.2f} process/sec").place(rely=0.5,relx=0.3)
-    cpu_un = ttk.Label(comput_frame, text=f"CPU utilization : {burst_t / s_time[-1] * 100:.2f}%").place(rely=0.7,relx=0.3)
+    avg_turn = ttk.Label(comput_frame, text=f"Avg Turnaround time :    {sum_tr / totalprocess:.2f}",).grid(row=1,column=1)
+    avg_wait = ttk.Label(comput_frame, text=f"Avg Waiting time :    {sum_wat / totalprocess:.2f}").grid(row=3,column=1)
+    thrput = ttk.Label(comput_frame, text=f"Throughput :    {totalprocess / s_time[-1]:.2f} process/sec").grid(row=1,column=3)
+    cpu_un = ttk.Label(comput_frame, text=f"CPU utilization :    {burst_t / s_time[-1] * 100:.2f}%").grid(row=3,column=3)
     
+    comput_frame.rowconfigure(0,minsize=10)
+    comput_frame.rowconfigure(3,minsize=30)
+    comput_frame.columnconfigure(2,minsize=20)
+    comput_frame.columnconfigure(0,minsize=10)
+
+
     # Copy value of process to sim in simulate
     load_file.proc = output
 
