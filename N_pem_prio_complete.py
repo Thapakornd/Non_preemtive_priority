@@ -220,11 +220,11 @@ def load_file(): # <-- Loadfile to excute
         # Check value while arrival time
         stk = 0
         for i in range(p_t,totalprocess):
-            if proc[i][2] <= b_t:
+            if proc[i][2] < b_t:
                 stk += 1
         
         for i in range(stk): # <---- swap Process with priority
-            for j in range(p_t,stk-i,1):
+            for j in range(p_t,stk-i+p_t-1,1):
                 if proc[j][3] > proc[j+1][3]:
                     temp = proc[j]
                     proc[j] = proc[j+1]
@@ -258,8 +258,8 @@ def load_file(): # <-- Loadfile to excute
             wat_t.append(taround_t[p_t]-proc[p_t][1])
             sum_tr += taround_t[p_t]
             sum_wat += wat_t[p_t]
-            sort_prio(s_time[-1],p_t)  # Sort priority at time
             p_t += 1   # <-- Assign process complete to break
+            sort_prio(s_time[-1],p_t)  # Sort priority at time
             t = s_time[-1]  # t == last time comput
         if p_t == totalprocess:
             break
