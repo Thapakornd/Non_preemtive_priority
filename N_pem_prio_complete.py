@@ -6,7 +6,6 @@ import time
 
 root = tk.Tk()
 root.geometry("800x600")
-root.iconbitmap(r'icons.ico')
 root.title("CPU scheduling Non-Preemtive-Priority v1.0")
 root.resizable(0,0)
 
@@ -240,6 +239,7 @@ def load_file(): # <-- Loadfile to excute
     sum_wat = 0  # <--- Sum waiting time
     sum_tr = 0  # <--- Sum turn time
 
+    # Total Burst time
     for i in range(totalprocess):
         burst_t += proc[i][1]
 
@@ -250,21 +250,31 @@ def load_file(): # <-- Loadfile to excute
         if proc[p_t][2] <= t:  # <-- Check Arrival time
             if t != s_time[-1]:  # <-- Check before arrival to cal
                 s_time.append(t)
-                # Output append "None" when no process in previos timm:t
+                # Add "None" space when time not in process
                 output.append(["None",t-s_time[-2],s_time[-2],s_time[-1]])
-            s_time.append(proc[p_t][1] + s_time[-1])  # <-- Burst time add to time
+            
+            # Burst time add to time
+            s_time.append(proc[p_t][1] + s_time[-1])
             output.append([proc[p_t][0],proc[p_t][1],s_time[-2],s_time[-1]])
+            
+            # Turnaround and Waiting
             taround_t.append(s_time[-1]-proc[p_t][2])
             wat_t.append(taround_t[p_t]-proc[p_t][1])
+            
+            # Avg Turnaround and Waiting
             sum_tr += taround_t[p_t]
             sum_wat += wat_t[p_t]
+            
             p_t += 1   # <-- Assign process complete to break
             sort_prio(s_time[-1],p_t)  # Sort priority at time
             t = s_time[-1]  # t == last time comput
+        
+        # Check process complete
         if p_t == totalprocess:
             break
-        # Check 't' if next Process arrival time > 't' + 1 sec
-        if proc[p_t][2] != s_time[-1] and proc[p_t][2] > s_time[-1]:
+        
+        # Check Arrival time to add time
+        if proc[p_t][2] > s_time[-1]:
             t += 1
 
     # Add value to process
